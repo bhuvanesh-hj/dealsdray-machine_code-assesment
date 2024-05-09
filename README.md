@@ -19,6 +19,7 @@ The project consists of the following pages:
 - **Database**: MongoDB (using Mongoose)
 
 ## Demo video
+https://www.loom.com/share/473f887785b84864a1c4f1cf059c5511
 
 ## Getting Started
 To run the project locally, follow these steps:
