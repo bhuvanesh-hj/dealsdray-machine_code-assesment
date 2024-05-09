@@ -12,7 +12,7 @@ const Login = () => {
 	const [signInData, setSignInData] = useState({});
 	const [loading, setLoading] = useState(false);
 	const navigate = useNavigate();
-	const { setRef } = useContext(MyContext);
+	const { ref,setRef } = useContext(MyContext);
 
 	// SignUp handlers
 	const handleSignUpChange = (e) => {
@@ -87,7 +87,7 @@ const Login = () => {
 
 			localStorage.setItem("token", JSON.stringify(signIn.data.token));
 			localStorage.setItem("user", JSON.stringify(signIn.data.user.username));
-			setRef(signIn.data.user.username);
+			setRef(!ref);
 			setLoading(false);
 			navigate("/home");
 			// console.log(signIn.data.user.username);

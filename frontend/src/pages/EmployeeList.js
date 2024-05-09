@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { getEmployeeList, deleteEmployee, searchEmployee } from "../actions";
+import { getEmployeeList, deleteEmployee } from "../actions";
 import { Link, useNavigate } from "react-router-dom";
 
 const EmployeeList = () => {
 	const [list, setList] = useState([]);
 	const [search, setSearch] = useState("");
-	const [searchResults, setSearchResults] = useState([]);
 	const [sort, setSort] = useState("");
+	const [currentPage, setCurrentPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [totalEmployees, setTotalEmployees] = useState(0);
 	const navigate = useNavigate();
+	let limit = 5;
 
 	async function fetchData() {
-		const data = await getEmployeeList();
-		setList(data);
+		const response = await getEmployeeList(currentPage, limit, search);
+		setList(response.employees);
+		setTotalPages(response.pagination.totalPages);
+		setTotalEmployees(response.pagination.totalEmployees);
 	}
 
 	const handleDeleteEmployee = async (id) => {
@@ -25,9 +30,11 @@ const EmployeeList = () => {
 
 	const handlesSearch = async (e) => {
 		setSearch(e.target.value);
-		if (!search) return;
-		const data = await searchEmployee(search);
-		setSearchResults(data);
+		setCurrentPage(1);
+	};
+
+	const handlePageChange = (page) => {
+		setCurrentPage(page);
 	};
 
 	useEffect(() => {
@@ -56,7 +63,7 @@ const EmployeeList = () => {
 		}
 
 		fetchData();
-	}, [navigate]);
+	}, [navigate, currentPage, search]);
 
 	return (
 		<div className="md:w-[90%] w-[90%] mx-auto px-2 py-8">
@@ -64,6 +71,7 @@ const EmployeeList = () => {
 				<div>
 					<h1 className="text-2xl font-bold">Employee List</h1>
 					<p className="text-gray-500">View and manage your team members.</p>
+					<p>Total Employees: {totalEmployees}</p>
 				</div>
 				<div className="flex items-center space-x-4">
 					<Link to="/createEmployee">
@@ -143,124 +151,109 @@ const EmployeeList = () => {
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-						{search
-							? searchResults.map((employee, idx) => (
-									<tr key={employee._id}>
-										<td className="px-4 py-3">
-											<p>{idx + 1}</p>
-										</td>
-										<td className="px-4 py-3">
-											<div className="flex items-center">
-												<img
-													alt="Employee Avatar"
-													className="mr-3 h-10 w-10 rounded-full object-cover"
-													height={40}
-													src={employee.image}
-													style={{
-														aspectRatio: "40/40",
-														objectFit: "cover",
-													}}
-													width={40}
-												/>
-											</div>
-										</td>
-										<td className="px-4 py-3">
-											<p className="font-medium">{employee.name}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.designation}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.courses}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.gender}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.email}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.createdDate}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.mobile}</p>
-										</td>
-										<td className="px-4 py-3">
-											<div className="flex items-center space-x-2">
-												<button
-													className="px-3 py-2 rounded-md border-2 border-yellow-400 font-semibold hover:bg-yellow-400"
-													onClick={() => handleEditEmployee(employee._id)}>
-													Edit
-												</button>
-												<button
-													className="px-3 py-2 rounded-md border-2 border-red-600 font-semibold hover:bg-red-600"
-													onClick={() => handleDeleteEmployee(employee._id)}>
-													Delete
-												</button>
-											</div>
-										</td>
-									</tr>
-							  ))
-							: list.map((employee, idx) => (
-									<tr key={employee._id}>
-										<td className="px-4 py-3">
-											<p>{idx + 1}</p>
-										</td>
-										<td className="px-4 py-3">
-											<div className="flex items-center">
-												<img
-													alt="Employee Avatar"
-													className="mr-3 h-10 w-10 rounded-full object-cover"
-													height={40}
-													src={employee.image}
-													style={{
-														aspectRatio: "40/40",
-														objectFit: "cover",
-													}}
-													width={40}
-												/>
-											</div>
-										</td>
-										<td className="px-4 py-3">
-											<p className="font-medium">{employee.name}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.designation}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.courses}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.gender}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.email}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.createdDate}</p>
-										</td>
-										<td className="px-4 py-3">
-											<p>{employee.mobile}</p>
-										</td>
-										<td className="px-4 py-3">
-											<div className="flex items-center space-x-2">
-												<button
-													className="px-3 py-2 rounded-md border-2 border-yellow-400 font-semibold hover:bg-yellow-400"
-													onClick={() => handleEditEmployee(employee._id)}>
-													Edit
-												</button>
-												<button
-													className="px-3 py-2 rounded-md border-2 border-red-600 font-semibold hover:bg-red-600"
-													onClick={() => handleDeleteEmployee(employee._id)}>
-													Delete
-												</button>
-											</div>
-										</td>
-									</tr>
-							  ))}
+						{list.map((employee, idx) => (
+							<tr key={employee._id}>
+								<td className="px-4 py-3">
+									<p>{idx + 1}</p>
+								</td>
+								<td className="px-4 py-3">
+									<div className="flex items-center">
+										<img
+											alt="Employee Avatar"
+											className="mr-3 h-10 w-10 rounded-full object-cover"
+											height={40}
+											src={employee.image}
+											style={{
+												aspectRatio: "40/40",
+												objectFit: "cover",
+											}}
+											width={40}
+										/>
+									</div>
+								</td>
+								<td className="px-4 py-3">
+									<p className="font-medium">{employee.name}</p>
+								</td>
+								<td className="px-4 py-3">
+									<p>{employee.designation}</p>
+								</td>
+								<td className="px-4 py-3">
+									<p>{employee.courses}</p>
+								</td>
+								<td className="px-4 py-3">
+									<p>{employee.gender}</p>
+								</td>
+								<td className="px-4 py-3">
+									<p>{employee.email}</p>
+								</td>
+								<td className="px-4 py-3">
+									<p>{employee.createdDate}</p>
+								</td>
+								<td className="px-4 py-3">
+									<p>{employee.mobile}</p>
+								</td>
+								<td className="px-4 py-3">
+									<div className="flex items-center space-x-2">
+										<button
+											className="px-3 py-2 rounded-md border-2 border-yellow-400 font-semibold hover:bg-yellow-400"
+											onClick={() => handleEditEmployee(employee._id)}>
+											Edit
+										</button>
+										<button
+											className="px-3 py-2 rounded-md border-2 border-red-600 font-semibold hover:bg-red-600"
+											onClick={() => handleDeleteEmployee(employee._id)}>
+											Delete
+										</button>
+									</div>
+								</td>
+							</tr>
+						))}
 					</tbody>
 				</table>
 			</div>
+			<nav
+				aria-label="Page navigation example"
+				className="flex justify-center my-1">
+				<ul className="inline-flex -space-x-px text-sm">
+					<li>
+						<button
+							onClick={() => handlePageChange(currentPage - 1)}
+							disabled={currentPage === 1}
+							className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border ${
+								currentPage === 1
+									? "border-e-0"
+									: "border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+							} rounded-s-lg `}>
+							Previous
+						</button>
+					</li>
+					{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+						<li key={page}>
+							<button
+								onClick={() => handlePageChange(page)}
+								className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border ${
+									currentPage === page
+										? "bg-gray-500 text-white"
+										: "border-gray-300"
+								} hover:bg-gray-100 hover:text-gray-700`}>
+								{page}
+							</button>
+						</li>
+					))}
+					<li>
+						<button
+							onClick={() => handlePageChange(currentPage + 1)}
+							disabled={currentPage === totalPages}
+							className={`flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border ${
+								currentPage === totalPages
+									? "border-e-0"
+									: "border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+							} rounded-e-lg  `}>
+							Next
+						</button>
+					</li>
+				</ul>
+			</nav>
 		</div>
 	);
 };

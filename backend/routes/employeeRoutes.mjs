@@ -38,7 +38,7 @@ router.get("/employees", protect, getAllEmployees);
 router.get("/employee/:id", protect, getEmployeeById);
 router.put("/employee/:id", protect, validateEmployee, editEmployee);
 router.delete("/employee/:id", protect, deleteEmployee);
-router.get("/employee", protect, searchEmployees);
+// router.get("/employee", protect, searchEmployees);
 
 // Export the router
 export default router;

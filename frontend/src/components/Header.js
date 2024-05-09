@@ -8,13 +8,14 @@ const Header = () => {
 	const location = useLocation();
 	const [signedIn, setSignedIn] = useState(false);
 	const [user, setUser] = useState("");
-	const { ref } = useContext(MyContext);
+	const { ref, setRef } = useContext(MyContext);
 	const navigate = useNavigate();
 
 	const handleLogout = () => {
 		localStorage.removeItem("token");
 		localStorage.removeItem("user");
 		setUser("");
+		setRef(!ref)
 		setSignedIn(false);
 		navigate("/");
 	};

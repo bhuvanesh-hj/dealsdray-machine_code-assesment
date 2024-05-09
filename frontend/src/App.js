@@ -11,7 +11,7 @@ import NotFound from "./pages/NotFound";
 
 function App() {
 	// State to manage the reference
-	const [ref, setRef] = useState("");
+	const [ref, setRef] = useState(true);
 
 	return (
 		<MyContext.Provider value={{ ref, setRef }}>

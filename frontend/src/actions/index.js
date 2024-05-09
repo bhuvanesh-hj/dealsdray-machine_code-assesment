@@ -3,13 +3,19 @@ import axios from "axios";
 let token = JSON.parse(localStorage.getItem("token"));
 let api = "http://localhost:4000/api/admin";
 
-const getEmployeeList = async () => {
+const getEmployeeList = async (page, limit, search) => {
+	if (!token) {
+		token = JSON.parse(localStorage.getItem("token"));
+	}
 	try {
-		const response = await axios.get(`${api}/employees`, {
-			headers: {
-				Authorization: `Bearer ${token}`, // Attach token to request headers
-			},
-		});
+		const response = await axios.get(
+			`${api}/employees?page=${page}&limit=${limit}&search=${search}`,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`, // Attach token to request headers
+				},
+			}
+		);
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching employee list:", error);
@@ -17,6 +23,9 @@ const getEmployeeList = async () => {
 };
 
 const createEmployee = async (data) => {
+		if (!token) {
+			token = JSON.parse(localStorage.getItem("token"));
+		}
 	try {
 		const response = await axios.post(`${api}/employee`, data, {
 			headers: {
@@ -30,6 +39,9 @@ const createEmployee = async (data) => {
 };
 
 const deleteEmployee = async (id) => {
+		if (!token) {
+			token = JSON.parse(localStorage.getItem("token"));
+		}
 	try {
 		const response = await axios.delete(`${api}/employee/${id}`, {
 			headers: {
@@ -43,6 +55,9 @@ const deleteEmployee = async (id) => {
 };
 
 const editEmployee = async (data, id) => {
+		if (!token) {
+			token = JSON.parse(localStorage.getItem("token"));
+		}
 	try {
 		const response = await axios.put(`${api}/employee/${id}`, data, {
 			headers: {
@@ -56,6 +71,9 @@ const editEmployee = async (data, id) => {
 };
 
 const getEmployee = async (id) => {
+		if (!token) {
+			token = JSON.parse(localStorage.getItem("token"));
+		}
 	try {
 		const response = await axios.get(`${api}/employee/${id}`, {
 			headers: {
@@ -68,18 +86,6 @@ const getEmployee = async (id) => {
 	}
 };
 
-const searchEmployee = async (search) => {
-	try {
-		const response = await axios.get(`${api}/employee?search=${search}`, {
-			headers: {
-				Authorization: `Bearer ${token}`, // Attach token to request headers
-			},
-		});
-		return response.data;
-	} catch (error) {
-		console.error("Error fetching employee list:", error);
-	}
-};
 
 export {
 	getEmployeeList,
@@ -87,5 +93,4 @@ export {
 	deleteEmployee,
 	editEmployee,
 	getEmployee,
-	searchEmployee
 };

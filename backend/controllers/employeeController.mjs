@@ -37,8 +37,39 @@ const createEmployee = async (req, res) => {
 
 const getAllEmployees = async (req, res) => {
 	try {
-		const employees = await Employee.find();
-		res.status(200).json(employees);
+		const page = parseInt(req.query.page) || 1; // Current page, default is 1
+		const limit = parseInt(req.query.limit) || 10; // Number of items per page, default is 10
+		const search = req.query.search || ""; // Search term, default is empty string
+
+		const startIndex = (page - 1) * limit;
+		const endIndex = page * limit;
+
+		let query = {};
+
+		if (search) {
+			query = {
+				$or: [
+					{ name: { $regex: search, $options: "i" } }, // Case-insensitive search by name
+					{ email: { $regex: search, $options: "i" } }, // Case-insensitive search by email
+				],
+			};
+		}
+
+		const totalEmployees = await Employee.countDocuments(query);
+		const totalPages = Math.ceil(totalEmployees / limit);
+
+		const employees = await Employee.find(query).skip(startIndex).limit(limit);
+
+		// Pagination metadata
+		const pagination = {
+			currentPage: page,
+			totalPages: totalPages,
+			totalEmployees: totalEmployees,
+			hasNextPage: endIndex < totalEmployees,
+			hasPreviousPage: page > 1,
+		};
+
+		res.status(200).json({ employees, pagination });
 	} catch (error) {
 		res
 			.status(500)
